@@ -1,0 +1,31 @@
+{
+  "name": "project_video_call",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "env-cmd -f ./.env nodemon --inspect server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-console.log.log --copy-files",
+    "build:prod": "babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-console.log.log --copy-files",
+    "start:dev": "npm run build && node dist/server/index.js",
+    "start:prod": "node dist/server/index.js",
+    "dev": "nodemon --exec babel-node server/index.js",
+    "pm2": "yarn build && yarn pm2:start",
+    "pm2:start": "pm2 start ecosystem.config.js"
+  },
+  "keywords": [],
+  "author": "lambiengcode",
+  "license": "ISC",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "socket.io": "^4.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}

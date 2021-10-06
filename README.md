@@ -16,7 +16,7 @@
 - **Server STUN** will response sdp text,type(is "answer") and candidate string to **Client 2**
 - **Client 2** need copy above responses and send to **Client 1**
 - **Client 1** set peer connection remote to sdp of **Client 2** and add candidate of **Client 2**
-- 🚀 Okay, Client 1 and 2 connected...
+- Okay, Client 1 and 2 connected...
 
 ### Multiple peers possible?
 
