@@ -4,7 +4,7 @@
 - This is sandbox video call application using Flutter and WebRTC, you can call from browser to browser, phone to phone, browser to phone and opposite.
 
 ### How does it work?
-<img src="https://reviewkhachsan.com/wp-content/uploads/2021/04/What-is-WebRTC-and-How-to-Disable-it-in-Your-Browser-shutterstock-body.jpg" height="350px" width="600px" />
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmabd7ndAdO33N2I9kAYIfdy-EfP3nEjTveA&usqp=CAU" height="350px" width="600px" />
 
 - 🚀 **Client 1** and **Client 2** create peer connection by request create to **Server STUN** (url stun server: stun:stun.l.google.com:19302)
 <img src="https://bloggeek.me/wp-content/uploads/2017/11/201711-NAT-example.jpg">
