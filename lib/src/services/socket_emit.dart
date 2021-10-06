@@ -1,4 +1,4 @@
-import 'package:get_boilerplate/src/services/socket.dart';
+import 'package:get_boilerplate/src/pages/home/home_page.dart';
 
 class SocketEmit {
   joinCall(int id) {
