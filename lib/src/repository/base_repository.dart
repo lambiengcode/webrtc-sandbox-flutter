@@ -10,8 +10,7 @@ class BaseRepository {
     Map<String, String> paramsObject = {};
     if (params != null)
       params.split('&').forEach((element) {
-        paramsObject[element.split('=')[0].toString()] =
-            element.split('=')[1].toString();
+        paramsObject[element.split('=')[0].toString()] = element.split('=')[1].toString();
       });
     http.Response response = await http.get(
       params == null
