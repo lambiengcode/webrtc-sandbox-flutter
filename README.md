@@ -1,185 +1,46 @@
-## Flutter Getx Template
+## Video Call Flutter App 📱
 
 ### Description:
-- This is source flutter template use getx for statemanagement ☕
+- This is sandbox video call application using Flutter and WebRTC, you can call from browser to browser, phone to phone, browser to phone and opposite.
 
-<img src="https://raw.githubusercontent.com/jonataslaw/getx-community/master/get.png"/>
+### How does it work?
+<img src="https://reviewkhachsan.com/wp-content/uploads/2021/04/What-is-WebRTC-and-How-to-Disable-it-in-Your-Browser-shutterstock-body.jpg" height="350px" width="600px" />
 
-👀 Overview ******main.dart******, After you can customize languages package, themes, pages and routes
-```dart
-import 'package:flutter/material.dart';
-import 'package:get_boilerplate/src/lang/translation_service.dart';
-import 'package:get_boilerplate/src/routes/app_pages.dart';
-import 'package:get_boilerplate/src/shared/logger/logger_utils.dart';
-import 'package:get_boilerplate/src/theme/theme_service.dart';
-import 'package:get_boilerplate/src/theme/themes.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+- 🚀 **Client 1** and **Client 2** create peer connection by request create to **Server STUN** (url stun server: stun:stun.l.google.com:19302)
+<img src="https://bloggeek.me/wp-content/uploads/2017/11/201711-NAT-example.jpg">
 
-void main() async {
-  await GetStorage.init();
-  runApp(GetMaterialApp(
-    debugShowCheckedModeBanner: false,
-    enableLog: true,
-    logWriterCallback: Logger.write,
-    initialRoute: AppPages.INITIAL,
-    getPages: AppPages.routes,
-    locale: TranslationService.locale,
-    fallbackLocale: TranslationService.fallbackLocale,
-    translations: TranslationService(),
-    theme: Themes().lightTheme,
-    darkTheme: Themes().darkTheme,
-    themeMode: ThemeService().getThemeMode(),
-  ));
-}
-```
+- **Client 1** request **Server STUN** create offer
+- **Server STUN** will response sdp text and type is "offer" to **Client 1**
+- **Client 1** need copy sdp text, type and send to **Client 2** then ** Client 2** set peer connection remote to sdp of **Client 1** 
+- **Client 2** create answer for **Client 1**
+- **Server STUN** will response sdp text,type(is "answer") and candidate string to **Client 2**
+- **Client 2** need copy above responses and send to **Client 1**
+- **Client 1** set peer connection remote to sdp of **Client 2** and add candidate of **Client 2**
+- 🚀 Okay, Client 1 and 2 connected...
 
-#### 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Customize languages package
-- ******translation_service.dart******
-```dart
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+### Multiple peers possible?
 
-import 'en_US.dart';
-import 'vi_VN.dart';
+- I found 3 ways for do it!
 
-class TranslationService extends Translations {
-  static final locale = Get.deviceLocale;
-  static final fallbackLocale = Locale('en', 'US');
-  @override
-  Map<String, Map<String, String>> get keys => {
-        'en_US': en_US,
-        'vi_VN': vi_VN,
-      };
-}
-```
-- ******en_US.dart******
-```dart
-const Map<String, String> en_US = {
-  'helloWord': 'Hello World',
-};
-```
+#### 🚀 **Option 1**: Mesh Model
+<img src="https://lh5.googleusercontent.com/dZz8iCifelmoStbR2wstm5cUMyh5IM1XnIan9t7num6YflZ3_AvI89PByJJGv6Sehi86B5RdOOHI0uhfVBcV1WIp1-ihhHJkl5dKjDSzpSxCvCoU84rzV5q1-b6DL2djQdL003J7" width="600px"/>
 
-- 🔥 similar to other language files
+- It looks similar to WebRTC basic P2P, with this model if there are 6 or more users the performance will be very bad.
 
-#### 🌓 Customize theme package
-- ******themes.dart******
-```dart
-import 'package:flutter/material.dart';
-import 'package:get_boilerplate/src/public/styles.dart';
+#### 🚀 **Option 2**: MCUs – Multipoint Control Units
+<img src="https://lh3.googleusercontent.com/01AEN-RDO0IVtK12jTyShrDgMABwXXumCJeCCmaXlsyLL9i2XXNKZ2Kz3BEoWeJzi2GUkSVtosLnVkFDAEVA1SeSHFUmFb8lMdNta8rKlJhSpB__5uyblm5wMrNjXUWYni-GMPCU" width="600px"/>
 
-class Themes {
-  final lightTheme = ThemeData.light().copyWith(
-    primaryColor: colorPrimary,
-    appBarTheme: AppBarTheme(
-      brightness: Brightness.light,
-      textTheme: TextTheme(
-        headline2: TextStyle(color: colorTitle),
-      ),
-    ),
-  );
-  final darkTheme = ThemeData.dark().copyWith(
-    primaryColor: colorPrimary,
-    appBarTheme: AppBarTheme(
-      brightness: Brightness.dark,
-      textTheme: TextTheme(
-        headline2: TextStyle(color: mC),
-      ),
-    ),
-  );
-}
-```
+- MCUs are also referred to as Multipoint Conferencing Units. Whichever way you spell it out, the basic functionality is shown in the following diagram.
+- Each peer in the group call establishes a connection with the MCU server to send up its video and audio. The MCU, in turn, makes a composite video and audio stream containing all of the video/audio from each of the peers, and sends that back to everyone.
+- Regardless of the number of participants in the call, the MCU makes sure that each participant gets only one set of video and audio. This means the participants’ computers don’t have to do nearly as much work. The tradeoff is that the MCU is now doing that same work. So, as your calls and applications grow, you will need bigger servers in an MCU-based architecture than an SFU-based architecture. But, your participants can access the streams reliably and you won’t bog down their devices.
+- Media servers that implement MCU architectures include Kurento (which Twilio Video is based on), Frozen Mountain, and FreeSwitch.
 
-#### 🌞 save theme mode in device storage
-- ******theme_service.dart******
-```dart
-import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:get/get.dart';
+#### 🚀 **Option 3**: SFUs – Selective Forwarding Units
+<img src="https://lh4.googleusercontent.com/puUKv2ve5bkx88wUhb_OG7ydimoSi74_hXT1akU7YUzmrSg29arhlhwWdg5e6x03KhBwnt_7OD0qVOYNfq-U3tpjVgDAwGMkzklVuUWp-jcNXUzPXFWJgD9oowQHWSVu5NxZtwB4" width="600px"/>
 
-class ThemeService {
-  final _getStorage = GetStorage();
-  final storageKey = 'isDarkMode';
+- In this case, each participant still sends just one set of video and audio up to the SFU, like our MCU. However, the SFU doesn’t make any composite streams. Rather, it sends a different stream down for each user. In this example, 4 streams are received by each participant, since there are 5 people in the call.
+- The good thing about this is it’s still less work on each participant than a mesh peer-to-peer model. This is because each participant is only establishing one connection (to the SFU) instead of to all other participants to upload their own video/audio. But, it can be more bandwidth intensive than the MCU because the participants each receive multiple streams downloaded.
+- The nice thing for participants about receiving separate streams is that they can do whatever they want with them. They are not bound to layout or UI decisions of the MCU. If you have been in a conference call where the conferencing tool allowed you to choose a different layout (ie, which speaker’s video will be most prominent, or how you want to arrange the videos on the screen), then that was using an SFU.
+- Media servers which implement an SFU architecture include Jitsi and Janus.
 
-  ThemeMode getThemeMode() {
-    return isSavedDarkMode() ? ThemeMode.dark : ThemeMode.light;
-  }
-
-  bool isSavedDarkMode() {
-    return _getStorage.read(storageKey) ?? false;
-  }
-
-  void saveThemeMode(bool isDarkMode) {
-    _getStorage.write(storageKey, isDarkMode);
-  }
-
-  void changeThemeMode() {
-    Get.changeThemeMode(isSavedDarkMode() ? ThemeMode.light : ThemeMode.dark);
-    saveThemeMode(!isSavedDarkMode());
-  }
-}
-
-```
-
-#### </> Log error for dev
-- ******logger_utils.dart******
-```dart
-class Logger {
-  static void write(String text, {bool isError = false}) {
-    Future.microtask(() => print('** $text. isError: [$isError]'));
-  }
-}
-```
-
-#### 🔗 Management routes
-- ******app_routes.dart******
-```dart
-part of 'app_pages.dart';
-
-abstract class Routes {
-  static const ROOT = '/root';
-  static const HOME = '/home';
-}
-```
-
-#### 📂 Management pages
-- ******app_pages.dart******
-```dart
-import 'package:get_boilerplate/src/app.dart';
-import 'package:get/get.dart';
-part 'app_routes.dart';
-
-// ignore: avoid_classes_with_only_static_members
-class AppPages {
-  static const INITIAL = Routes.ROOT;
-
-  static final routes = [
-    GetPage(
-      name: Routes.ROOT,
-      page: () => App(),
-      children: [],
-    ),
-  ];
-}
-```
-
-
-### How I can run it?
-- :rocket: flutter version < 2.0 (1.x.x), not support null safety
-- :rocket: clone this repository
-- :rocket: run below code in terminal
-```terminal
-flutter pub get
-flutter run
-```
-
-### Lib use in project:
-```dart
-get_test: ^3.13.3
-get_storage: ^1.4.0
-```
-
-### Author:
-```dart
-lambiengcode
-```
+#### Reference link: https://webrtc.ventures/2020/12/webrtc-media-servers-sfus-vs-mcus/
