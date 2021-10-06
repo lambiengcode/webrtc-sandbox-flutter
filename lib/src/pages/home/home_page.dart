@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as RTC;
+import 'package:get_boilerplate/src/pages/call/call_screen.dart';
 import 'package:get_boilerplate/src/services/socket_emit.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   int _start = 0;
   String _timmer = '';
   bool _offer = false;
+  String _sdpReceiveCalling = '';
 
   //VideoCallVariables
   RTC.RTCPeerConnection _peerConnection;
@@ -109,9 +111,12 @@ class _HomePageState extends State<HomePage> {
               // Opponent accept my call
               _addCandidate(ice);
             } else if (message["sdp"]["type"] == "offer") {
-              _createPeerConnection().then((pc) {
-                _peerConnection = pc;
-                _setRemoteDescription(message["sdp"]["sdp"]);
+              // _createPeerConnection().then((pc) {
+              //   _peerConnection = pc;
+              //   _setRemoteDescription(message["sdp"]["sdp"]);
+              // });
+              setState(() {
+                _sdpReceiveCalling = message['sdp']['sdp'];
               });
             } else if (message["sdp"]["type"] == "answer") {
               // Opponent accept my call
@@ -283,22 +288,37 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   width: size.width,
                   height: size.height - size.width * .15,
-                  child: _remoteRenderer.textureId == null
-                      ? Container()
-                      : FittedBox(
-                          fit: BoxFit.cover,
-                          child: new Center(
-                            child: new SizedBox(
-                              width: size.height * 1.34,
-                              height: size.height,
-                              child: new Transform(
-                                transform: Matrix4.identity()..rotateY(0.0),
-                                alignment: FractionalOffset.center,
-                                child: new Texture(textureId: _remoteRenderer.textureId),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _remoteRenderer.textureId == null
+                            ? Container()
+                            : FittedBox(
+                                fit: BoxFit.cover,
+                                child: new Center(
+                                  child: new SizedBox(
+                                    width: size.height * 1.34,
+                                    height: size.height,
+                                    child: new Transform(
+                                      transform: Matrix4.identity()..rotateY(0.0),
+                                      alignment: FractionalOffset.center,
+                                      child: new Texture(textureId: _remoteRenderer.textureId),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
+                      ),
+                      Expanded(
+                        child: _sdpReceiveCalling.length == 0
+                            ? Container()
+                            : CallPage(
+                                info: _sdpReceiveCalling,
+                                localStream: _localStream,
+                                localRenderer: _localRenderer,
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
                 Positioned(
                   top: 40.0,
@@ -380,7 +400,7 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.redAccent,
                       ),
                       child: Icon(
-                        Icons.close,
+                        Icons.phone_missed,
                         color: Colors.white,
                         size: size.width / 14.0,
                       ),
@@ -399,7 +419,7 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.green,
                       ),
                       child: Icon(
-                        Icons.check,
+                        Icons.phone,
                         color: Colors.white,
                         size: size.width / 14.0,
                       ),

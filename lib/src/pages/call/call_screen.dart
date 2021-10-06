@@ -8,39 +8,48 @@ import 'package:sdp_transform/sdp_transform.dart';
 
 class CallPage extends StatefulWidget {
   final dynamic info;
-  final Function handleRefreshLocalStream;
   final localStream;
+  final localRenderer;
 
-  CallPage({this.info, this.handleRefreshLocalStream, this.localStream});
+  CallPage({this.info, this.localStream, this.localRenderer});
 
   @override
   State<StatefulWidget> createState() => _CallPageState();
 }
 
 class _CallPageState extends State<CallPage> {
+  Timer _timmerInstance;
+  int _start = 0;
+  String _timmer = '';
+
   //VideoCallVariables
   RTC.RTCPeerConnection _peerConnection;
   RTC.RTCVideoRenderer _remoteRenderer = RTC.RTCVideoRenderer();
+  bool isFrontCamera = true;
 
   @override
   void initState() {
     super.initState();
+
+    initRenderers();
     _createPeerConnection().then((pc) {
       _peerConnection = pc;
       _setRemoteDescription(widget.info);
     });
-    initRenderers();
   }
 
   @override
   void dispose() {
     _peerConnection.close();
+    _timmerInstance.cancel();
     super.dispose();
   }
 
   initRenderers() async {
     await _remoteRenderer.initialize();
   }
+
+  void switchCamera() async {}
 
   void _createAnswer() async {
     RTC.RTCSessionDescription description = await _peerConnection.createAnswer({
@@ -59,6 +68,12 @@ class _CallPageState extends State<CallPage> {
         };
   }
 
+  void _setRemoteDescription(sdp) async {
+    RTC.RTCSessionDescription description = new RTC.RTCSessionDescription(sdp, 'offer');
+    await _peerConnection.setRemoteDescription(description);
+    _createAnswer();
+  }
+
   _createPeerConnection() async {
     Map<String, dynamic> configuration = {
       "iceServers": [
@@ -74,9 +89,8 @@ class _CallPageState extends State<CallPage> {
       "optional": [],
     };
 
-    widget.handleRefreshLocalStream();
-
     RTC.RTCPeerConnection pc = await RTC.createPeerConnection(configuration, offerSdpConstraints);
+    // if (pc != null) print(pc);
     pc.addStream(widget.localStream);
 
     pc.onIceCandidate = (e) {
@@ -101,12 +115,6 @@ class _CallPageState extends State<CallPage> {
     return pc;
   }
 
-  void _setRemoteDescription(sdp) async {
-    RTC.RTCSessionDescription description = new RTC.RTCSessionDescription(sdp, 'offer');
-    await _peerConnection.setRemoteDescription(description);
-    _createAnswer();
-  }
-
   Future sendCandidates(
     String candidate,
     String sdpMid,
@@ -126,6 +134,7 @@ class _CallPageState extends State<CallPage> {
 
   endCall() {
     _peerConnection.close();
+    _timmerInstance.cancel();
   }
 
   @override
