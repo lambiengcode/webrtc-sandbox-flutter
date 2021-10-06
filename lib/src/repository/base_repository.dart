@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 const root_url = "domain_api.com";
 const socket_url = "domain_api.com";
 
-class BaseRepository {
+class HandleApis {
   get(String name, [String params]) async {
     Map<String, String> paramsObject = {};
     if (params != null)
