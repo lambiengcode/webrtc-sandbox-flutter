@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as RTC;
-import 'package:get_boilerplate/src/pages/call/call_screen.dart';
+import 'package:get_boilerplate/src/pages/home/widgets/remote_view_card.dart';
 import 'package:get_boilerplate/src/services/socket_emit.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   int _start = 0;
   String _timmer = '';
   bool _offer = false;
-  String _sdpReceiveCalling = '';
+  List<String> _sdpReceiveCallings = [];
 
   //VideoCallVariables
   RTC.RTCPeerConnection _peerConnection;
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
               //   _setRemoteDescription(message["sdp"]["sdp"]);
               // });
               setState(() {
-                _sdpReceiveCalling = message['sdp']['sdp'];
+                _sdpReceiveCallings.add(message['sdp']['sdp']);
               });
             } else if (message["sdp"]["type"] == "answer") {
               // Opponent accept my call
@@ -286,43 +286,28 @@ class _HomePageState extends State<HomePage> {
             Stack(
               children: [
                 Container(
+                  padding: EdgeInsets.only(top: 12.0),
+                  color: Colors.black,
                   width: size.width,
                   height: size.height - size.width * .15,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: _remoteRenderer.textureId == null
-                            ? Container()
-                            : FittedBox(
-                                fit: BoxFit.cover,
-                                child: new Center(
-                                  child: new SizedBox(
-                                    width: size.height * 1.34,
-                                    height: size.height,
-                                    child: new Transform(
-                                      transform: Matrix4.identity()..rotateY(0.0),
-                                      alignment: FractionalOffset.center,
-                                      child: new Texture(textureId: _remoteRenderer.textureId),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                      ),
-                      Expanded(
-                        child: _sdpReceiveCalling.length == 0
-                            ? Container()
-                            : CallPage(
-                                info: _sdpReceiveCalling,
-                                localStream: _localStream,
-                                localRenderer: _localRenderer,
-                              ),
-                      ),
-                    ],
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 4.0,
+                      crossAxisSpacing: 4.0,
+                    ),
+                    itemCount: _sdpReceiveCallings.length + 1,
+                    itemBuilder: (context, index) {
+                      return index == 0
+                          ? _offerRemoteWidget(size)
+                          : _answerRemoteWidget(
+                              _sdpReceiveCallings[_sdpReceiveCallings.length - 1]);
+                    },
                   ),
                 ),
                 Positioned(
-                  top: 40.0,
-                  left: 15.0,
+                  bottom: 15.0,
+                  right: 15.0,
                   child: Column(
                     children: [
                       Text(
@@ -335,18 +320,17 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         height: 8.0,
                       ),
-                      Container(
-                        height: size.width * .54,
-                        width: size.width * .32,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                          border: Border.all(color: Colors.blueAccent, width: 2.0),
-                        ),
-                        child: _localRenderer.textureId == null
-                            ? Container()
-                            : SizedBox(
-                                width: size.height,
-                                height: size.height,
+                      _localRenderer.textureId == null
+                          ? Container()
+                          : FittedBox(
+                              fit: BoxFit.contain,
+                              child: Container(
+                                height: size.width * .48,
+                                width: size.width * .32,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                                  border: Border.all(color: Colors.blueAccent, width: 2.0),
+                                ),
                                 child: new Transform(
                                   transform: Matrix4.identity()
                                     ..rotateY(
@@ -356,7 +340,7 @@ class _HomePageState extends State<HomePage> {
                                   child: new Texture(textureId: _localRenderer.textureId),
                                 ),
                               ),
-                      ),
+                            ),
                       SizedBox(
                         height: 12.0,
                       ),
@@ -369,7 +353,7 @@ class _HomePageState extends State<HomePage> {
                           height: size.width * .125,
                           width: size.width * .125,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                            shape: BoxShape.circle,
                             border: Border.all(color: Colors.blueAccent, width: 2.0),
                             color: Colors.blueAccent,
                           ),
@@ -377,7 +361,7 @@ class _HomePageState extends State<HomePage> {
                           child: Icon(
                             Icons.switch_camera,
                             color: Colors.white,
-                            size: size.width / 14.0,
+                            size: size.width / 18.0,
                           ),
                         ),
                       ),
@@ -431,6 +415,31 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _offerRemoteWidget(Size size) {
+    return _remoteRenderer.textureId == null
+        ? Container()
+        : FittedBox(
+            fit: BoxFit.cover,
+            child: Container(
+              height: size.width * .45,
+              width: size.width * .45,
+              child: Transform(
+                transform: Matrix4.identity()..rotateY(0.0),
+                alignment: FractionalOffset.center,
+                child: Texture(textureId: _remoteRenderer.textureId),
+              ),
+            ),
+          );
+  }
+
+  Widget _answerRemoteWidget(String sdp) {
+    return RemoteViewCard(
+      info: sdp,
+      localStream: _localStream,
+      localRenderer: _localRenderer,
     );
   }
 }

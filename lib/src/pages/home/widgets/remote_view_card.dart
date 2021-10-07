@@ -6,21 +6,19 @@ import 'package:get_boilerplate/src/pages/home/home_page.dart';
 import 'package:get_boilerplate/src/services/socket_emit.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 
-class CallPage extends StatefulWidget {
+class RemoteViewCard extends StatefulWidget {
   final dynamic info;
   final localStream;
   final localRenderer;
 
-  CallPage({this.info, this.localStream, this.localRenderer});
+  RemoteViewCard({this.info, this.localStream, this.localRenderer});
 
   @override
-  State<StatefulWidget> createState() => _CallPageState();
+  State<StatefulWidget> createState() => _RemoteViewCardState();
 }
 
-class _CallPageState extends State<CallPage> {
+class _RemoteViewCardState extends State<RemoteViewCard> {
   Timer _timmerInstance;
-  int _start = 0;
-  String _timmer = '';
 
   //VideoCallVariables
   RTC.RTCPeerConnection _peerConnection;
@@ -145,15 +143,13 @@ class _CallPageState extends State<CallPage> {
           ? Container()
           : FittedBox(
               fit: BoxFit.cover,
-              child: new Center(
-                child: new SizedBox(
-                  width: size.height * 1.34,
-                  height: size.height,
-                  child: new Transform(
-                    transform: Matrix4.identity()..rotateY(0.0),
-                    alignment: FractionalOffset.center,
-                    child: new Texture(textureId: _remoteRenderer.textureId),
-                  ),
+              child: Container(
+                height: size.width * .45,
+                width: size.width * .45,
+                child: Transform(
+                  transform: Matrix4.identity()..rotateY(0.0),
+                  alignment: FractionalOffset.center,
+                  child: Texture(textureId: _remoteRenderer.textureId),
                 ),
               ),
             ),
